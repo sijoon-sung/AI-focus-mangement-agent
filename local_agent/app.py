@@ -8,6 +8,7 @@ from local_agent.store import Store
 from local_agent.planner import recommend, suggest_link, daily_summary
 from local_agent.sensors import WindowsSensor
 from local_agent.learning import capture, context, infer
+from local_agent.inbox_ui import InboxPanel
 
 STATE_NAMES = {'todo': '예정', 'doing': '진행 중', 'paused': '중단', 'waiting': '대기', 'done': '완료'}
 KIND_NAMES = {'general': '일반', 'coding': '개발', 'writing': '작성', 'research': '자료 조사', 'admin': '행정'}
@@ -54,12 +55,16 @@ class AgentApp:
         self.today = ttk.Frame(tabs, padding=14)
         self.review = ttk.Frame(tabs, padding=14)
         self.privacy = ttk.Frame(tabs, padding=14)
+        self.inbox_tab = ttk.Frame(tabs, padding=14)
+        tabs.add(self.inbox_tab, text='  메모와 하루 계획  ')
         tabs.add(self.today, text='  계획과 실행  ')
         tabs.add(self.review, text='  근거와 회고  ')
         tabs.add(self.privacy, text='  개인정보  ')
         self._build_today()
         self._build_review()
         self._build_privacy()
+        self.inbox = InboxPanel(self.inbox_tab, store, self.start_inbox_plan)
+        self.banner.set('계획은 짧게, 시작은 가볍게. 오늘 하고 싶은 일을 적어 주세요.')
         # A crash must never count all overnight downtime as work.
         active = store.active()
         if active:
@@ -110,6 +115,23 @@ class AgentApp:
         ttk.Label(bottom, textvariable=self.observation).pack(side='left')
         ttk.Button(bottom, text='최근 앱 범주를 선택 작업에 연결', command=self.confirm_link).pack(side='right')
 
+    def start_inbox_plan(self, task_id):
+        active = self.store.active()
+        if task_id and not active:
+            self.store.start(task_id)
+            self.store.set_setting('last_heartbeat',time.time())
+            self.banner.set('시작했어요. 잠깐 쉬거나 다른 일을 해도 괜찮아요. 돌아오면 이어서 하면 돼요.')
+        elif active:
+            task_id = active['task_id']
+            self.banner.set('계획을 저장했어요. 지금 하던 일은 그대로 이어가요.')
+        else:
+            self.banner.set('계획을 저장했어요. 시작할 준비가 되면 작업을 골라 주세요.')
+        self.refresh()
+        if task_id:
+            self.tree.selection_set(str(task_id))
+            self.show_detail()
+        self.today.master.select(self.today)
+
     def _build_review(self):
         self.summary = tk.StringVar()
         ttk.Label(self.review, textvariable=self.summary, wraplength=950).pack(anchor='w', pady=(0, 10))
@@ -148,6 +170,7 @@ class AgentApp:
             self.exclude_vars[key] = var
             ttk.Checkbutton(group, text=label, variable=var, command=self.save_exclusions).pack(side='left', padx=(0, 10))
         info = ('계획·메모·세션·사용자가 확인한 범주 연결은 직접 삭제할 때까지 보관합니다.\n'
+                '자유 문장 정리를 요청하면 메모 본문을 이 컴퓨터의 Ollama에 전달합니다. 외부 서버로 보내지 않습니다.\n'
                   '학습 정답(최근 5분 통계·작업 종류)은 활동 기록과 같은 보관일을 적용합니다.\n'
                   '직접 내보낸 학습 모델 파일은 기록 삭제와 별개로 파일을 직접 삭제해야 합니다.\n'
                 '활동 범주는 개인정보일 수 있습니다. 로컬 DB는 암호화하지 않으며 이 Windows 계정의 파일 권한에 의존합니다.\n'
@@ -419,6 +442,7 @@ class AgentApp:
     def reset(self):
         if messagebox.askyesno('전체 초기화', '모든 계획·메모·세션·개인화·설정을 삭제합니다. 계속할까요?', parent=self.root):
             self.store.reset()
+            self.inbox.reset()
             self.collection.set(False)
             self.retention.set('7')
             self.budget.set('60')
@@ -474,6 +498,7 @@ class AgentApp:
         self.tick_id = self.root.after(15000, self.tick)
 
     def close(self):
+        self.inbox.close()
         if self.tick_id:
             self.root.after_cancel(self.tick_id)
         self.store.pause('앱 종료로 세션 중단')

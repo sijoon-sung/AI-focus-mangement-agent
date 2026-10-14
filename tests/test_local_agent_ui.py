@@ -47,6 +47,23 @@ class DesktopTests(unittest.TestCase):
         self.assertEqual(self.store.task(self.task)['state'], 'waiting')
         self.assertIsNone(self.store.task(self.task)['wait_until'])
 
+    def test_inbox_preview_apply_and_stale_guard(self):
+        panel = self.app.inbox
+        panel.notes.insert('1.0','! 논문 읽기 [30분]\n보고서 작성')
+        self.root.update()
+        panel.preview()
+        self.assertEqual(len(panel.tree.get_children()),2)
+        with patch('local_agent.inbox_ui.messagebox.askyesno',return_value=True):
+            panel.apply()
+        self.assertEqual(len(self.store.tasks()),3)
+        self.assertIn('논문 읽기',self.store.setting('inbox_text'))
+        panel.notes.insert('end','\n메일 보내기')
+        self.root.update()
+        with patch('local_agent.inbox_ui.messagebox.showinfo') as info:
+            panel.apply()
+        info.assert_called_once()
+        self.assertEqual(len(self.store.tasks()),3)
+
     def test_opt_in_category_only_and_exclusion(self):
         self.app.collection.set(True)
         self.app.change_collection()
