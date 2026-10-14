@@ -18,6 +18,7 @@ def main():
     from local_agent.app import configure_dpi
     p=argparse.ArgumentParser()
     p.add_argument('--output',type=Path,default=Path('runs/desktop-live'))
+    p.add_argument('--specialists',type=Path,help='Also verify real screen_layout / goal_history checkpoints')
     args=p.parse_args()
     args.output.mkdir(parents=True,exist_ok=True)
     # Timestamped DB avoids affecting either user state or a previous run.
@@ -27,6 +28,12 @@ def main():
     ctk.set_window_scaling(1)
     root=ctk.CTk()
     app=DesktopApp(root,store,start_timer=True,check_models=True)
+    if args.specialists:
+        import torch
+        torch.set_num_threads(2)
+        from local_agent.specialists import Specialists
+        app.specialists=Specialists()
+        for role in ['screen_layout','goal_history']:app.specialists.load(args.specialists/(role+'.pt'))
     def pump(seconds=.3):
         deadline=time.monotonic()+seconds
         while time.monotonic()<deadline:
@@ -85,6 +92,11 @@ def main():
         assert 'RUNNING' in result['screen_reading'],result['screen_reading']
         trace=json.loads(store.db.execute('SELECT trace FROM decisions WHERE id=?',(app.ai_trace_id,)).fetchone()[0])
         assert any(e['source']=='vision_text_unverified' for e in trace['card']['evidence']),trace
+        if args.specialists:
+            specialist_evidence=[e for e in trace['card']['evidence'] if e['source']=='public_specialist_hypothesis']
+            assert {e['value']['role'] for e in specialist_evidence}=={'screen_layout','goal_history'},trace
+            assert all(e['value']['observation_ids'] for e in specialist_evidence)
+            result['specialist_roles']=[e['value']['role'] for e in specialist_evidence]
         result['screen_suggestion']=trace['result']['suggestion']
         app.main_button.invoke()
         assert store.active()['task_id']==task_id

@@ -26,7 +26,15 @@ def return_card(store,task_id):
     evidence += [dict(id=f"event-{e['id']}",source=e['kind'],value=e['detail']) for e in events[-10:]]
     context_id=0
     text_id=0
+    specialist_ids=[]
     if store.setting('screen_text_enabled',False):
+        seen_roles=set()
+        for r in store.db.execute("SELECT * FROM concepts WHERE modality='specialist' AND at>=? ORDER BY id DESC",(time.time()-600,)):
+            data=json.loads(r['data'])
+            if data.get('task_id')==task_id and data.get('role') not in seen_roles:
+                seen_roles.add(data.get('role'))
+                specialist_ids.append(r['id'])
+                evidence.append(dict(id=f"specialist-{r['id']}",source='public_specialist_hypothesis',value=data))
         # A requested screen reading is historical evidence, not a live state.
         # Keep it usable through model loading/reading latency, with its timestamp.
         for r in store.db.execute("SELECT * FROM concepts WHERE modality='screen_text' AND at>=? ORDER BY id DESC",(time.time()-600,)):
@@ -49,7 +57,7 @@ def return_card(store,task_id):
     if task['state']=='waiting':
         actions.insert(0,dict(id='check_wait',label='대기 중인 결과 직접 확인'))
     return dict(task=task,checkpoint=saved,events=events,evidence=evidence,actions=actions,
-                revision=[task['state'],task['title'],task['next_action'],row['id'] if row else 0,events[-1]['id'] if events else 0,context_id,text_id])
+                revision=[task['state'],task['title'],task['next_action'],row['id'] if row else 0,events[-1]['id'] if events else 0,context_id,text_id,specialist_ids])
 
 
 def render_card(card):
@@ -65,6 +73,11 @@ def render_card(card):
     lines += [e['detail'] for e in card['events'][-10:]] or ['새로 확인된 이벤트는 없어요.']
     lines += ['', '이 카드는 저장한 기록입니다. 실제 진척이나 집중 상태를 자동으로 확인한 것은 아니에요.']
     for e in card['evidence']:
+        if e['source']=='public_specialist_hypothesis':
+            value=e['value']
+            lines+=['',f"공개 데이터 모델 추정: {value['role']} · {'예비 모델' if value.get('pilot') else '학습 모델'}",
+                    json.dumps(value.get('occupancy',value.get('candidates',[])),ensure_ascii=False),
+                    '근거 ID: '+e['id']+' · 가중치: '+value['model_digest'][:12]]
         if e['source']=='vision_text_unverified':
             captured=e['value'].get('captured_at')
             when=time.strftime('%H:%M:%S',time.localtime(captured)) if captured else '시각 미기록'

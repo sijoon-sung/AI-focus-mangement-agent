@@ -1,0 +1,294 @@
+{
+  "version": "public-specialists-v1",
+  "role": "goal_history",
+  "seed": 7,
+  "pilot": true,
+  "counts": {
+    "train": 550,
+    "val": 129,
+    "test": 144
+  },
+  "parameters": 313731,
+  "manifest_sha256": "e211b224839217f67bf759fa4decbe9b7f3e1139c4ff2894c2515d3744398cae",
+  "source": {
+    "dataset": "osunlp/Mind2Web",
+    "revision": "17ece8eb89862368edc0cc806acee6fca5163474",
+    "license": "CC-BY-4.0",
+    "downloaded_splits": [
+      "train"
+    ],
+    "shards": [
+      0,
+      10
+    ],
+    "evaluation": "internal website-disjoint split of official TRAIN ONLY; not official test performance",
+    "tasks": 109,
+    "sites": {
+      "rei": "train",
+      "kayak": "train",
+      "carmax": "train",
+      "ultimate-guitar": "train",
+      "underarmour": "train",
+      "newegg": "train",
+      "seatgeek": "train",
+      "new.mta.info": "train",
+      "imdb": "train",
+      "delta": "train",
+      "booking": "train",
+      "nyc": "train",
+      "united": "train",
+      "amtrak": "train",
+      "sixflags": "train",
+      "parking": "train",
+      "jetblue": "train",
+      "espn": "train",
+      "exploretock": "train",
+      "agoda": "train",
+      "soundcloud": "train",
+      "us.megabus": "train",
+      "enterprise": "train",
+      "airbnb": "train",
+      "sports.yahoo": "train",
+      "instacart": "train",
+      "eventbrite": "train",
+      "uniqlo": "train",
+      "ticketcenter": "val",
+      "tvguide": "val",
+      "ign": "val",
+      "redbox": "val",
+      "tesla": "val",
+      "rottentomatoes": "val",
+      "amazon": "test",
+      "travelzoo": "test",
+      "gamestop": "test",
+      "budget": "test",
+      "kohls": "test",
+      "viator": "test"
+    },
+    "files": {
+      "train_0.json": "c8b622901057bca813a6d171733c41e4fc266c2902a23d63b9094c0add3f8f2c",
+      "train_10.json": "182542d7947b3fa9e90fc57a3d82d4d8f2997ca5a06664217720d7a78a956e33"
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 3.601127513105219,
+      "val_loss": 2.9779415232266566
+    },
+    {
+      "epoch": 2,
+      "train_loss": 2.0517574323307386,
+      "val_loss": 3.0988570590351903
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.5601344494386153,
+      "val_loss": 3.050746513429538
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.327094616022977,
+      "val_loss": 3.0069777466530025
+    },
+    {
+      "epoch": 5,
+      "train_loss": 1.1949550420587713,
+      "val_loss": 3.0400882192360337
+    },
+    {
+      "epoch": 6,
+      "train_loss": 1.0969945331053301,
+      "val_loss": 3.0394965022109277
+    },
+    {
+      "epoch": 7,
+      "train_loss": 1.0324539503184231,
+      "val_loss": 3.101084192131841
+    },
+    {
+      "epoch": 8,
+      "train_loss": 1.0084298746152358,
+      "val_loss": 2.9224042781563693
+    },
+    {
+      "epoch": 9,
+      "train_loss": 1.010564270886508,
+      "val_loss": 3.092279371365096
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.9176745556701313,
+      "val_loss": 2.9334690265877303
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.8850502226569436,
+      "val_loss": 3.2764612852140913
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.8448963917385448,
+      "val_loss": 3.4017201703648237
+    }
+  ],
+  "validation": {
+    "goal_retrieval": {
+      "top1": 0.13953489065170288,
+      "mrr": 0.2713632881641388
+    },
+    "frozen_mean_embedding_baseline": {
+      "top1": 0.1705426424741745,
+      "mrr": 0.3186376392841339
+    },
+    "alignment_weight": 0.25,
+    "selected_retrieval": {
+      "top1": 0.1705426424741745,
+      "mrr": 0.3266450762748718
+    },
+    "next_operation_accuracy": 0.5658914728682171,
+    "next_operation_macro_f1": 0.3221342861652374,
+    "operation_confusion": [
+      [
+        63,
+        42,
+        0
+      ],
+      [
+        11,
+        10,
+        0
+      ],
+      [
+        2,
+        1,
+        0
+      ]
+    ],
+    "prefixes": 129,
+    "candidate_goals": 24,
+    "note": "Internal held-out websites; before-action page text. No completion/distraction labels."
+  },
+  "test": {
+    "goal_retrieval": {
+      "top1": 0.0972222238779068,
+      "mrr": 0.23593375086784363
+    },
+    "frozen_mean_embedding_baseline": {
+      "top1": 0.1180555522441864,
+      "mrr": 0.2842870354652405
+    },
+    "alignment_weight": 0.25,
+    "selected_retrieval": {
+      "top1": 0.2013888955116272,
+      "mrr": 0.33293139934539795
+    },
+    "next_operation_accuracy": 0.6736111111111112,
+    "next_operation_macro_f1": 0.381241112947464,
+    "operation_confusion": [
+      [
+        92,
+        16,
+        23
+      ],
+      [
+        5,
+        3,
+        2
+      ],
+      [
+        1,
+        0,
+        2
+      ]
+    ],
+    "prefixes": 144,
+    "candidate_goals": 18,
+    "note": "Internal held-out websites; before-action page text. No completion/distraction labels."
+  },
+  "limits": "Public-domain capability training; no measured personal productivity benefit or intent/distraction labels.",
+  "text_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "text_revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+  "missing_history_test": {
+    "2": {
+      "goal_retrieval": {
+        "top1": 0.1041666641831398,
+        "mrr": 0.24180123209953308
+      },
+      "frozen_mean_embedding_baseline": {
+        "top1": 0.1180555522441864,
+        "mrr": 0.287544846534729
+      },
+      "alignment_weight": 0.25,
+      "selected_retrieval": {
+        "top1": 0.1944444477558136,
+        "mrr": 0.3269508183002472
+      },
+      "next_operation_accuracy": 0.6944444444444444,
+      "next_operation_macro_f1": 0.4071439206600189,
+      "operation_confusion": [
+        [
+          94,
+          22,
+          15
+        ],
+        [
+          4,
+          4,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "prefixes": 144,
+      "candidate_goals": 18,
+      "note": "Internal held-out websites; before-action page text. No completion/distraction labels."
+    },
+    "4": {
+      "goal_retrieval": {
+        "top1": 0.1111111119389534,
+        "mrr": 0.2508341670036316
+      },
+      "frozen_mean_embedding_baseline": {
+        "top1": 0.1388888955116272,
+        "mrr": 0.3003140985965729
+      },
+      "alignment_weight": 0.25,
+      "selected_retrieval": {
+        "top1": 0.1944444477558136,
+        "mrr": 0.32725417613983154
+      },
+      "next_operation_accuracy": 0.6944444444444444,
+      "next_operation_macro_f1": 0.3575701415538788,
+      "operation_confusion": [
+        [
+          94,
+          29,
+          8
+        ],
+        [
+          4,
+          6,
+          0
+        ],
+        [
+          1,
+          2,
+          0
+        ]
+      ],
+      "prefixes": 144,
+      "candidate_goals": 18,
+      "note": "Internal held-out websites; before-action page text. No completion/distraction labels."
+    }
+  },
+  "next_operation_majority_baseline": {
+    "label": "CLICK",
+    "accuracy": 0.9097222222222222,
+    "macro_f1": 0.31757575757575757
+  },
+  "checkpoint_sha256": "34c4a48a119ac07d710a9d8cfc87f7b83311fe26b359296f14f0537d70a560ab"
+}

@@ -77,6 +77,7 @@ class DesktopApp:
         self.lab_window = None
         self.ai_trace_id = None
         self.privacy_revision = 0
+        self.specialists = None
         self.store.set_setting('screen_text_enabled', False)
         active = store.active()
         if active:
@@ -572,6 +573,30 @@ class DesktopApp:
         captured_at=time.time()
         self.set_ai('선택한 화면을 읽고 있어요. 화면 읽기가 끝나면 복귀 제안으로 연결할게요…')
         from local_agent.screen_text import read_screen
+        specialists=self.specialists
+        goals=[t['title'] for t in self.store.tasks() if t['state']!='done'][:30]
+        prior=[];prior_ids=[]
+        for record in self.store.db.execute("SELECT id,data FROM concepts WHERE modality='screen_text' ORDER BY id DESC LIMIT 8"):
+            item=json.loads(record['data'])
+            if item.get('task_id')==task_id:
+                prior.append(item['visible_text']);prior_ids.append(record['id'])
+        prior.reverse();prior_ids.reverse()
+        def analyze():
+            result=read_screen(image)
+            hypotheses=[]
+            if specialists:
+                errors=[]
+                for role in ['screen_layout','goal_history']:
+                    if role not in specialists.models:continue
+                    try:
+                        value=specialists.layout(image) if role=='screen_layout' else specialists.goal_alignment(prior+[result['visible_text']],goals)
+                        value.pop('maps',None)
+                        hypotheses.append(value)
+                    except Exception as exc:
+                        errors.append(role+': '+error_text(exc))
+                result['specialist_errors']=errors
+            result['specialists']=hypotheses
+            return result
         def ready(result,error):
             if privacy_revision!=self.privacy_revision:
                 return
@@ -582,11 +607,16 @@ class DesktopApp:
                 self.set_ai('화면을 읽지 못했어요 · '+error_text(error))
                 return
             self.store.set_setting('screen_text_enabled',True)
-            record_concept(self.store,'screen_text',dict(result,task_id=task_id,captured_at=captured_at),at=captured_at)
+            hypotheses=result.pop('specialists',[])
+            text_id=record_concept(self.store,'screen_text',dict(result,task_id=task_id,captured_at=captured_at),at=captured_at)
+            for hypothesis in hypotheses:
+                record_concept(self.store,'specialist',dict(hypothesis,task_id=task_id,captured_at=captured_at,observation_ids=prior_ids+[text_id]),at=captured_at)
             self.set_ai('읽은 내용 (확인 필요): '+result['visible_text'])
             self.notice.configure(text='화면 읽기 완료 · 내용을 복귀 제안에 연결했어요. 원본 이미지는 저장하지 않았어요.',text_color=GREEN)
+            if result.get('specialist_errors'):
+                self.notice.configure(text='화면은 읽었지만 일부 모델을 사용하지 못했어요 · '+'; '.join(result['specialist_errors']),text_color='#AD6B22')
             self.ask_help()
-        self.job('screen',lambda:read_screen(image),ready)
+        self.job('screen',analyze,ready)
 
     def settings(self):
         win=self.dialog('설정',660,620)
@@ -613,6 +643,7 @@ class DesktopApp:
         self.label(panel,'연구 도구',16,True).pack(anchor='w',pady=(18,6))
         self.label(panel,'CNN·GRU 학습과 카메라는 선택 기능입니다. 일상 사용에 필요하지 않아요.',12,color=MUTED).pack(anchor='w')
         self.button(panel,'학습 및 관측 도구 열기',self.open_lab).pack(anchor='w',pady=10)
+        self.button(panel,'공개 데이터 학습 모델 연결',self.load_specialists).pack(anchor='w',pady=6)
         self.button(panel,'실행 중인 작업의 종료 기다리기',self.watch_dialog).pack(anchor='w',pady=6)
 
     def clear_observations(self):
@@ -623,6 +654,28 @@ class DesktopApp:
             self.ai_trace_id=None
             self.set_ai('관측과 AI 근거를 지웠어요.')
             self.render()
+
+    def load_specialists(self):
+        from tkinter import filedialog
+        folder=filedialog.askdirectory(parent=self.root,title='screen_layout.pt / goal_history.pt 모델 폴더 선택')
+        if not folder:return
+        from pathlib import Path
+        from local_agent.specialists import Specialists
+        def load():
+            registry=Specialists();loaded=[]
+            for name in ['screen_layout','goal_history']:
+                path=Path(folder)/(name+'.pt')
+                if path.exists():loaded.append(registry.load(path))
+            if not loaded:raise ValueError('이 폴더에 화면/목표 이력 모델이 없어요.')
+            return registry,loaded
+        def ready(result,error):
+            if error:
+                self.notice.configure(text=error_text(error),text_color='#B44739')
+            else:
+                self.specialists=result[0]
+                names=', '.join(r['role']+(' (예비 학습)' if r['pilot'] else '') for r in result[1])
+                self.notice.configure(text='연결했어요: '+names+' · 다음 화면 읽기부터 근거에 추가됩니다.',text_color=GREEN)
+        self.job('specialist_load',load,ready)
 
     def open_lab(self):
         if self.lab_window and self.lab_window.winfo_exists():

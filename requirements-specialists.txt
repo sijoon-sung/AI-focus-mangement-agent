@@ -1,0 +1,4 @@
+-r requirements-research.txt
+scipy>=1.14,<2
+sentence-transformers>=5,<7
+ijson>=3.3,<4

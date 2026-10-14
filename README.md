@@ -1,5 +1,7 @@
 # Planwise Local
 
+**역할별 공개 데이터 학습:** [CameraGaze · ScreenLayout · GoalHistory](docs/PUBLIC_SPECIALISTS_KO.md). 개인 기록만으로 모델 전체를 학습하는 대신 MPIIGaze·GroundCUA·Mind2Web로 기본 능력을 학습합니다. 실제 공개 데이터 예비 가중치와 성적을 생성했고, [HPC 실행 스크립트](scripts/train-public-specialists.sh)로 데이터 확보부터 학습까지 재현할 수 있습니다. 예비 모델의 낮은 성능을 제품 수준으로 주장하지 않습니다.
+
 현재 실행·학습 안내: [Planwise Return 구현 상태](docs/RETURN_IMPLEMENTATION_KO.md). Granite 메모 파싱, Qwen 복귀 제안, 선택적 시각 관측, CNN/GRU 학습·불러오기·개인 보정을 앱에 연결했습니다. 실제 사용자 데이터로 학습한 시각/맥락 모델은 아직 없으며 미학습 상태에서 판단하지 않습니다. [전체 설계](docs/RETURN_AGENT_DESIGN_KO.md)에는 후속 범위도 포함돼 있습니다.
 
 **계획을 실행으로 연결하는 로컬 생산성 에이전트.** ActivityWatch·외부 API 없이 실행되는 Windows 데스크톱 MVP입니다. 자유 메모 파싱은 로컬 Granite 4 3B, 복귀 제안과 선택적 화면 문구 읽기는 Qwen3.5-4B를 사용합니다. CNN/GRU 및 카메라는 별도 연구 의존성이 필요합니다.

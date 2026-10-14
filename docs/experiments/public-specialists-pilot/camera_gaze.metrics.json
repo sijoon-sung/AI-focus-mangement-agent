@@ -1,0 +1,59 @@
+{
+  "version": "public-specialists-v1",
+  "role": "camera_gaze",
+  "seed": 7,
+  "pilot": true,
+  "counts": {
+    "train": 3300,
+    "val": 600,
+    "test": 600
+  },
+  "parameters": 162275,
+  "manifest_sha256": "1a3fac7b31fb8ac56bc490d88763fe5fe971c424d10d1f2b7bafc38cfc52a715",
+  "source": {
+    "dataset": "MPIIGaze",
+    "url": "https://datasets.d2.mpi-inf.mpg.de/MPIIGaze/MPIIGaze.tar.gz",
+    "license": "CC-BY-NC-SA-4.0; non-commercial scientific use",
+    "sha256": "b0710f16131888e6d2694fb6f29fede5123fd644912ec45905182a188fe78909",
+    "mat_files": 521
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.043429716753237174,
+      "val_loss": 0.012713092068831125
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.013387925101049018,
+      "val_loss": 0.009356078803539275
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.010081935362382369,
+      "val_loss": 0.008733618743717671
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.008971598780516421,
+      "val_loss": 0.009000692963600159
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.00856151136485013,
+      "val_loss": 0.009272665480772654
+    }
+  ],
+  "validation": {
+    "mean_angular_degrees": 6.794987201690674,
+    "median_angular_degrees": 6.572084426879883,
+    "examples": 600
+  },
+  "test": {
+    "mean_angular_degrees": 7.305363178253174,
+    "median_angular_degrees": 6.868270397186279,
+    "examples": 600
+  },
+  "limits": "Public-domain capability training; no measured personal productivity benefit or intent/distraction labels.",
+  "checkpoint_sha256": "c0801ea396ba4910f56472ffbf6ac358b5db9523d3bcd25cef5b07fbae71b7bd"
+}
