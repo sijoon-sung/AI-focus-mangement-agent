@@ -4,11 +4,11 @@
 
 **계획을 실행으로 연결하는 로컬 생산성 에이전트.** ActivityWatch·외부 API 없이 실행되는 Windows 데스크톱 MVP입니다. 자유 메모 파싱은 로컬 Granite 4 3B, 복귀 제안과 선택적 화면 문구 읽기는 Qwen3.5-4B를 사용합니다. CNN/GRU 및 카메라는 별도 연구 의존성이 필요합니다.
 
-새 시작 화면: **메모 적기 → 할 일 정리해줘 → 좋아, 시작하자**. 예상 시간과 배치는 완료 기록을 참고하고, 자세한 설정은 필요할 때만 열 수 있습니다. [메모와 하루 계획 안내](docs/INBOX_GUIDE_KO.md)
+기본 화면은 **CustomTkinter 기반의 한 화면 작업 공간**입니다. 왼쪽에서 메모를 정리하고, 오른쪽에서 타이머·쉬기·복귀·완료를 이어갑니다. 연구용 설정은 기본 화면에서 분리했습니다. [새 데스크톱 사용·검증 안내](docs/DESKTOP_GUIDE_KO.md)
 
 상태: **복귀 지원 앱 + 별도 카메라/화면 CNN·시간 맥락 GRU 학습 경로**. 관측은 선택적 단발 캡처이고 모델 파일은 직접 학습해 불러옵니다. 실제 사용자 정확도나 생산성 향상이 검증된 제품은 아닙니다.
 
-![Planwise 계획과 실행 화면 — 예제 데이터](docs/assets/planwise.png)
+![Planwise 새 데스크톱 — 합성 검증 데이터](docs/assets/planwise-desktop.png)
 
 ## 바로 실행
 
@@ -17,10 +17,11 @@ Python 3.11 이상(Tkinter 포함)을 설치한 뒤:
 ```bash
 git clone --branch codex/local-plan-agent https://github.com/sijoon-sung/AI-focus-mangement-agent.git
 cd AI-focus-mangement-agent
+python -m pip install -r requirements-desktop.txt
 python -m local_agent
 ```
 
-Windows에서는 `Start-Planwise.cmd`를 더블클릭해도 됩니다. `pip install`은 필요 없습니다. 연구용 PyTorch 의존성을 설치할 필요도 없습니다.
+Windows에서는 의존성 설치 후 `Start-Planwise.cmd`를 더블클릭해도 됩니다. 일상 UI에는 CustomTkinter와 Pillow만 필요하며 PyTorch는 선택적인 연구 기능용입니다. 이전 화면은 `python -m local_agent --classic`으로 열 수 있습니다.
 
 예제 작업으로 먼저 보려면 실제 데이터와 분리해서 실행하세요.
 
@@ -55,7 +56,7 @@ python -m unittest discover -s tests -p test_local_agent.py -v
 python -m local_agent --demo --ui-smoke --data-dir runs/ui-smoke
 ```
 
-`local_agent/store.py`는 저장, `planner.py`는 설명 가능한 규칙, `sensors.py`는 Windows 수집, `app.py`는 UI를 담당합니다.
+`local_agent/store.py`는 저장, `planner.py`는 설명 가능한 규칙, `desktop.py`는 기본 UI, `app.py`는 이전 연구 중심 UI를 담당합니다.
 
 기존 `main.py`와 `core/`는 이전 MediaPipe·ActivityWatch·Gemini 프로토타입입니다. 새 앱은 `python -m local_agent`로 실행하며 이전 서비스를 호출하지 않습니다.
 

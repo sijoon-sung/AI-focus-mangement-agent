@@ -11,6 +11,10 @@ jobs:
       - run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
       - run: pip install -r requirements-research.txt
       - run: python -m unittest discover -s tests -v
+      - run: sudo apt-get update && sudo apt-get install -y xvfb python3-tk
+      - run: xvfb-run -a python -m unittest discover -s tests -p test_desktop.py -v
+        env:
+          PLANWISE_UI_TESTS: '1'
       - run: python -m research.smoke
         env:
           OMP_NUM_THREADS: '2'

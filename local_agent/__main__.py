@@ -33,6 +33,7 @@ def main():
     p.add_argument('--data-dir', type=Path, default=Path(__file__).resolve().parents[1] / 'local_data')
     p.add_argument('--demo', action='store_true', help='Add example tasks only if database is empty; capture stays off')
     p.add_argument('--ui-smoke', action='store_true', help='Build UI and exit without collecting activity')
+    p.add_argument('--classic', action='store_true', help='Open the previous research-oriented interface')
     a = p.parse_args()
     a.data_dir.mkdir(parents=True, exist_ok=True)
     try:
@@ -47,13 +48,20 @@ def main():
             store.save_task('결과 해석 작성', '비교표 해석 3문단 작성', '오류 사례부터 정리', kind='writing', dependency=first)
             store.save_task('방법론 초안 작성', '데이터 분할과 실험 조건 기술', '실험 설정 파일 확인', kind='writing', estimate=40)
         configure_dpi()
-        root = tk.Tk()
-        app = AgentApp(root, store, start_timer=not a.ui_smoke)
+        if a.classic:
+            root = tk.Tk()
+            app = AgentApp(root, store, start_timer=not a.ui_smoke)
+        else:
+            import customtkinter as ctk
+            from local_agent.desktop import DesktopApp
+            root = ctk.CTk()
+            app = DesktopApp(root, store, start_timer=not a.ui_smoke,check_models=not a.ui_smoke)
         if a.ui_smoke:
             root.update()
-            app.show_recommendation()
+            if a.classic:
+                app.show_recommendation()
             root.update()
-            print('UI smoke passed: scratchpad, task, return, review, privacy and research tabs rendered.')
+            print('UI smoke passed: desktop rendered. No sensor or AI requests were made.')
             app.close()
         else:
             root.mainloop()

@@ -27,7 +27,9 @@ def return_card(store,task_id):
     context_id=0
     text_id=0
     if store.setting('screen_text_enabled',False):
-        for r in store.db.execute("SELECT * FROM concepts WHERE modality='screen_text' AND at>=? ORDER BY id DESC",(time.time()-60,)):
+        # A requested screen reading is historical evidence, not a live state.
+        # Keep it usable through model loading/reading latency, with its timestamp.
+        for r in store.db.execute("SELECT * FROM concepts WHERE modality='screen_text' AND at>=? ORDER BY id DESC",(time.time()-600,)):
             data=json.loads(r['data'])
             if data.get('task_id')==task_id:
                 text_id=r['id']
@@ -64,7 +66,9 @@ def render_card(card):
     lines += ['', '이 카드는 저장한 기록입니다. 실제 진척이나 집중 상태를 자동으로 확인한 것은 아니에요.']
     for e in card['evidence']:
         if e['source']=='vision_text_unverified':
-            lines += ['', '화면에서 읽은 후보 문구 (검증 안 됨): '+e['value']['visible_text']]
+            captured=e['value'].get('captured_at')
+            when=time.strftime('%H:%M:%S',time.localtime(captured)) if captured else '시각 미기록'
+            lines += ['', f'화면에서 읽은 후보 문구 ({when}, 현재 화면 상태 아님 · 검증 안 됨): '+e['value']['visible_text']]
         if e['source']=='model_hypothesis_not_fact':
             lines += ['', '최근 모델 추정 (사실 아님): '+e['value']['label'],
                       '판단 보류: '+str(e['value'].get('abstain',True)),
