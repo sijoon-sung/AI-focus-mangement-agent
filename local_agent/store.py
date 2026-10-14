@@ -36,6 +36,9 @@ class Store:
           id INTEGER PRIMARY KEY, at REAL NOT NULL, task_id INTEGER REFERENCES tasks(id),
           kind TEXT NOT NULL, trace TEXT NOT NULL, feedback TEXT);
         CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS learning_examples (
+          id INTEGER PRIMARY KEY, at REAL NOT NULL, day TEXT NOT NULL,
+          kind TEXT NOT NULL, features TEXT NOT NULL);
         ''')
         self.db.commit()
 
@@ -177,16 +180,18 @@ class Store:
         with self.db:
             self.db.execute('DELETE FROM observations WHERE at < ?', (cutoff,))
             self.db.execute('DELETE FROM decisions WHERE at < ?', (cutoff,))
+            self.db.execute('DELETE FROM learning_examples WHERE at < ?', (cutoff,))
 
     def clear_observations(self):
         with self.db:
             self.db.execute('DELETE FROM observations')
             self.db.execute('DELETE FROM links')
             self.db.execute('DELETE FROM decisions')
+            self.db.execute('DELETE FROM learning_examples')
 
     def reset(self):
         with self.db:
-            for table in ['decisions', 'observations', 'links', 'sessions', 'tasks', 'settings']:
+            for table in ['learning_examples', 'decisions', 'observations', 'links', 'sessions', 'tasks', 'settings']:
                 self.db.execute(f'DELETE FROM {table}')
         self.db.execute('VACUUM')
 

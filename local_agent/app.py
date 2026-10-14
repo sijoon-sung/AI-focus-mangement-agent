@@ -7,6 +7,7 @@ from tkinter import ttk, messagebox, simpledialog, filedialog
 from local_agent.store import Store
 from local_agent.planner import recommend, suggest_link, daily_summary
 from local_agent.sensors import WindowsSensor
+from local_agent.learning import capture, context, infer
 
 STATE_NAMES = {'todo': '예정', 'doing': '진행 중', 'paused': '중단', 'waiting': '대기', 'done': '완료'}
 KIND_NAMES = {'general': '일반', 'coding': '개발', 'writing': '작성', 'research': '자료 조사', 'admin': '행정'}
@@ -121,6 +122,7 @@ class AgentApp:
         for label, value in [('도움 됨', 'helpful'), ('도움 안 됨', 'not_helpful'), ('맥락이 틀림', 'wrong_context')]:
             ttk.Button(row, text=label, command=lambda v=value: self.give_feedback(v)).pack(side='left', padx=(0, 6))
         ttk.Button(row, text='집계 결과 내보내기', command=self.export_summary).pack(side='right')
+        ttk.Button(row, text='학습 모델로 최근 맥락 확인', command=self.inspect_model).pack(side='right', padx=6)
         ttk.Label(self.review, text='피드백은 로컬 평가 기록으로 저장합니다. 추천 규칙을 자동 변경하지 않습니다.', style='Sub.TLabel').pack(anchor='w', pady=8)
 
     def _build_privacy(self):
@@ -146,7 +148,8 @@ class AgentApp:
             self.exclude_vars[key] = var
             ttk.Checkbutton(group, text=label, variable=var, command=self.save_exclusions).pack(side='left', padx=(0, 10))
         info = ('계획·메모·세션·사용자가 확인한 범주 연결은 직접 삭제할 때까지 보관합니다.\n'
-                '개인화에는 사용자가 확인한 앱 범주 연결과 완료 작업의 세션 시간만 사용합니다.\n'
+                  '학습 정답(최근 5분 통계·작업 종류)은 활동 기록과 같은 보관일을 적용합니다.\n'
+                  '직접 내보낸 학습 모델 파일은 기록 삭제와 별개로 파일을 직접 삭제해야 합니다.\n'
                 '활동 범주는 개인정보일 수 있습니다. 로컬 DB는 암호화하지 않으며 이 Windows 계정의 파일 권한에 의존합니다.\n'
                 '기본 저장 위치는 프로젝트의 local_data입니다. 클라우드 동기화 폴더라면 --data-dir로 위치를 바꾸세요.\n'
                 '외부 전송·원격 API·텔레메트리 없음. 앱을 종료하면 수집·타이머 알림도 종료됩니다.')
@@ -346,9 +349,46 @@ class AgentApp:
             messagebox.showinfo('관측 없음', '수집을 켠 뒤 다른 앱을 사용하고 60초 안에 돌아오세요. 최근 관측이 있어야 연결할 수 있습니다.', parent=self.root)
             return
         category = self.latest['category']
-        if messagebox.askyesno('범주 연결 확인', f'최근 {CAT_NAMES[category]} 사용이 선택한 작업과 관련 있었나요?\n브라우저의 페이지 내용 등은 알 수 없습니다.', parent=self.root):
+        if messagebox.askyesno('범주 연결 확인', f'최근 {CAT_NAMES[category]} 사용이 선택한 작업과 관련 있었나요?\n최근 5분 범주 통계와 작업 종류를 로컬 학습 정답으로 저장합니다.\n브라우저의 페이지 내용 등은 알 수 없습니다.', parent=self.root):
             self.store.learn_link(task_id, category)
-            self.banner.set('직접 확인한 연결을 기록했습니다. 충분한 기록이 있을 때만 연결 후보를 표시합니다.')
+            saved = capture(self.store, task_id)
+            self.banner.set('연결을 기록했습니다. ' + ('학습 정답도 저장했습니다.' if saved else '학습 정답은 5분에 한 번, 최근 관측이 있을 때 저장합니다.'))
+
+    def inspect_model(self):
+        if not self.collection.get():
+            messagebox.showinfo('활동 수집 꺼짐', '수집을 직접 켜고 확인할 활동을 기록하세요.', parent=self.root)
+            return
+        x = context(self.store)
+        if x is None:
+            messagebox.showinfo('관측 없음', '60초 이내의 관측이 없어 판단을 보류합니다.', parent=self.root)
+            return
+        path = filedialog.askopenfilename(parent=self.root, title='직접 학습한 JSON 모델 선택', filetypes=[('JSON', '*.json')])
+        if not path:
+            return
+        try:
+            from pathlib import Path
+            if Path(path).stat().st_size > 1000000:
+                raise ValueError('모델 파일이 너무 큽니다.')
+            model = json.loads(Path(path).read_text(encoding='utf-8'))
+            if model.get('synthetic', True):
+                raise ValueError('합성 데이터 모델은 실제 앱에서 사용할 수 없습니다.')
+            result = infer(model, x)
+        except (OSError, ValueError, TypeError, KeyError, AttributeError) as exc:
+            messagebox.showerror('모델 확인 실패', str(exc), parent=self.root)
+            return
+        lines = ['학습된 활동 종류 모델 · 작업 자동 전환 없음',
+                 '판단 보류' if result['abstain'] else '후보 종류: ' + KIND_NAMES[result['kind']],
+                 f"최고 점수 종류: {KIND_NAMES[result['kind']]} / 비교 종류: {KIND_NAMES[result['runner_up']]}",
+                 f"점수 {result['score']:.4f} = 절편 {result['bias']:.4f} + 아래 기여 합계",
+                 f"softmax {result['softmax']:.3f} / 비교 종류와 점수 차이 {result['margin']:.4f}", result['note'], '']
+        for term in result['terms']:
+            lines.append(f"{term['feature']}: 입력 {term['input']:.3f}, 점수 기여 {term['contribution']:+.4f}")
+        candidates = [t['title'] for t in self.store.tasks() if t['kind']==result['kind'] and t['state'] not in {'done','waiting'}
+                      and (not t['dependency'] or self.store.task(t['dependency'])['state']=='done')]
+        lines += ['', '해당 종류의 실행 가능한 계획 (같은 종류 안에서는 구별하지 못함):', *candidates]
+        self.write_text(self.explanation, '\n'.join(lines))
+        self.decision_id = self.store.trace('learned_activity_kind', None, dict(result=result, model=model))
+        self.today.master.select(self.review)
 
     def change_collection(self):
         self.store.set_setting('collection_enabled', self.collection.get())
@@ -371,7 +411,7 @@ class AgentApp:
             messagebox.showinfo('보관 기간', '1~365일로 입력하세요.', parent=self.root)
 
     def clear_observations(self):
-        if messagebox.askyesno('기록 삭제', '활동 기록, 범주 연결 개인화, 판단·피드백 기록을 삭제할까요? 계획과 세션은 남습니다.', parent=self.root):
+        if messagebox.askyesno('기록 삭제', '활동·학습 정답·범주 연결·판단 기록을 삭제할까요? 계획과 세션은 남습니다. 내보낸 모델 파일은 직접 삭제하세요.', parent=self.root):
             self.store.clear_observations()
             self.latest, self.decision_id = None, None
             self.write_text(self.explanation, '활동·판단·범주 개인화 기록을 삭제했습니다.')

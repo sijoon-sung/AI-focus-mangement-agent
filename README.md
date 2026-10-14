@@ -2,7 +2,7 @@
 
 **계획을 실행으로 연결하는 로컬 생산성 에이전트.** ActivityWatch·외부 API·LLM 없이 실행되는 Windows 데스크톱 MVP입니다. Python 표준 라이브러리와 Tkinter만 사용합니다.
 
-상태: **작동하는 규칙 기반 MVP**. 학습된 집중력 모델이나 생산성 향상 효과가 검증된 제품은 아닙니다. 화면·카메라 관측, 소형 신경망, EBM, IDE 실행 완료 연동은 후속 연구 범위입니다.
+상태: **규칙 기반 MVP + 직접 학습 가능한 활동 종류 모델**. 실제 사용자 데이터로 학습한 집중력 모델이나 생산성 향상 효과가 검증된 제품은 아닙니다. 화면·카메라 관측, 소형 신경망, EBM, IDE 실행 완료 연동은 후속 연구 범위입니다.
 
 ![Planwise 계획과 실행 화면 — 예제 데이터](docs/assets/planwise.png)
 
@@ -54,3 +54,7 @@ python -m local_agent --demo --ui-smoke --data-dir runs/ui-smoke
 `local_agent/store.py`는 저장, `planner.py`는 설명 가능한 규칙, `sensors.py`는 Windows 수집, `app.py`는 UI를 담당합니다.
 
 기존 `main.py`와 `core/`는 이전 MediaPipe·ActivityWatch·Gemini 프로토타입입니다. 새 앱은 `python -m local_agent`로 실행하며 이전 서비스를 호출하지 않습니다.
+
+## 자체 학습 기능 추가
+
+사용자가 확인한 활동 통계로 작은 작업 종류 모델을 처음부터 학습할 수 있습니다. 학습·평가 명령과 개인정보 처리, 실제 데이터의 한계는 [자체 학습 안내](docs/MODEL_TRAINING_KO.md)를 참고하세요. 합성 데이터 학습은 검증용이며 실제 사용자 성능을 뜻하지 않습니다.
