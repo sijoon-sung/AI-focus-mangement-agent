@@ -1,0 +1,331 @@
+{
+  "version": "public-specialists-v1",
+  "role": "goal_history",
+  "seed": 7,
+  "pilot": true,
+  "counts": {
+    "train": 550,
+    "val": 129,
+    "test": 144
+  },
+  "parameters": 313731,
+  "manifest_sha256": "e211b224839217f67bf759fa4decbe9b7f3e1139c4ff2894c2515d3744398cae",
+  "source": {
+    "dataset": "osunlp/Mind2Web",
+    "revision": "17ece8eb89862368edc0cc806acee6fca5163474",
+    "license": "CC-BY-4.0",
+    "downloaded_splits": [
+      "train"
+    ],
+    "shards": [
+      0,
+      10
+    ],
+    "evaluation": "internal website-disjoint split of official TRAIN ONLY; not official test performance",
+    "tasks": 109,
+    "sites": {
+      "rei": "train",
+      "kayak": "train",
+      "carmax": "train",
+      "ultimate-guitar": "train",
+      "underarmour": "train",
+      "newegg": "train",
+      "seatgeek": "train",
+      "new.mta.info": "train",
+      "imdb": "train",
+      "delta": "train",
+      "booking": "train",
+      "nyc": "train",
+      "united": "train",
+      "amtrak": "train",
+      "sixflags": "train",
+      "parking": "train",
+      "jetblue": "train",
+      "espn": "train",
+      "exploretock": "train",
+      "agoda": "train",
+      "soundcloud": "train",
+      "us.megabus": "train",
+      "enterprise": "train",
+      "airbnb": "train",
+      "sports.yahoo": "train",
+      "instacart": "train",
+      "eventbrite": "train",
+      "uniqlo": "train",
+      "ticketcenter": "val",
+      "tvguide": "val",
+      "ign": "val",
+      "redbox": "val",
+      "tesla": "val",
+      "rottentomatoes": "val",
+      "amazon": "test",
+      "travelzoo": "test",
+      "gamestop": "test",
+      "budget": "test",
+      "kohls": "test",
+      "viator": "test"
+    },
+    "files": {
+      "train_0.json": "c8b622901057bca813a6d171733c41e4fc266c2902a23d63b9094c0add3f8f2c",
+      "train_10.json": "182542d7947b3fa9e90fc57a3d82d4d8f2997ca5a06664217720d7a78a956e33"
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 2.716502191370184,
+      "val_loss": 2.3901431403418845,
+      "seconds": 1.08
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.4440291825207796,
+      "val_loss": 2.3875529733739156,
+      "seconds": 0.319
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.20324491630901,
+      "val_loss": 2.3304909259773963,
+      "seconds": 0.328
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.0687316699461504,
+      "val_loss": 2.330473468285198,
+      "seconds": 0.348
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.9808299246701327,
+      "val_loss": 2.5958525187285373,
+      "seconds": 0.335
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.9006166323748502,
+      "val_loss": 2.3633310956548352,
+      "seconds": 0.318
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.8488904157551852,
+      "val_loss": 2.5618912600731667,
+      "seconds": 0.347
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.8500928870114414,
+      "val_loss": 2.195025038349536,
+      "seconds": 0.321
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.8883253752101551,
+      "val_loss": 2.5634736092977746,
+      "seconds": 0.342
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.8087615793401545,
+      "val_loss": 2.6213947931925454,
+      "seconds": 0.333
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.7375831088152799,
+      "val_loss": 2.7066352496775545,
+      "seconds": 0.322
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.7504102767597546,
+      "val_loss": 2.6308394864548084,
+      "seconds": 0.328
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.7229811429977417,
+      "val_loss": 2.4923068492911584,
+      "seconds": 0.349
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.7133296279473739,
+      "val_loss": 2.635451609312102,
+      "seconds": 0.358
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.7081142870946364,
+      "val_loss": 2.9226624926393345,
+      "seconds": 0.365
+    }
+  ],
+  "validation": {
+    "goal_retrieval": {
+      "top1": 0.10077519714832306,
+      "mrr": 0.23983223736286163
+    },
+    "frozen_mean_embedding_baseline": {
+      "top1": 0.1705426424741745,
+      "mrr": 0.3186376392841339
+    },
+    "alignment_weight": 0.0,
+    "selected_retrieval": {
+      "top1": 0.1705426424741745,
+      "mrr": 0.3186376392841339
+    },
+    "next_operation_accuracy": 0.6124031007751938,
+    "next_operation_macro_f1": 0.3456140458583832,
+    "operation_confusion": [
+      [
+        70,
+        30,
+        5
+      ],
+      [
+        12,
+        9,
+        0
+      ],
+      [
+        3,
+        0,
+        0
+      ]
+    ],
+    "prefixes": 129,
+    "candidate_goals": 24,
+    "note": "Internal held-out websites; before-action page text. No completion/distraction labels."
+  },
+  "test": {
+    "goal_retrieval": {
+      "top1": 0.0763888880610466,
+      "mrr": 0.20203730463981628
+    },
+    "frozen_mean_embedding_baseline": {
+      "top1": 0.1180555522441864,
+      "mrr": 0.2842870354652405
+    },
+    "alignment_weight": 0.0,
+    "selected_retrieval": {
+      "top1": 0.1180555522441864,
+      "mrr": 0.2842870354652405
+    },
+    "next_operation_accuracy": 0.625,
+    "next_operation_macro_f1": 0.3591129779815674,
+    "operation_confusion": [
+      [
+        85,
+        17,
+        29
+      ],
+      [
+        4,
+        3,
+        3
+      ],
+      [
+        1,
+        0,
+        2
+      ]
+    ],
+    "prefixes": 144,
+    "candidate_goals": 18,
+    "note": "Internal held-out websites; before-action page text. No completion/distraction labels."
+  },
+  "limits": "Public-domain capability training; no measured personal productivity benefit or intent/distraction labels.",
+  "text_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "text_revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+  "missing_history_test": {
+    "2": {
+      "goal_retrieval": {
+        "top1": 0.0763888880610466,
+        "mrr": 0.2062792032957077
+      },
+      "frozen_mean_embedding_baseline": {
+        "top1": 0.1180555522441864,
+        "mrr": 0.287544846534729
+      },
+      "alignment_weight": 0.0,
+      "selected_retrieval": {
+        "top1": 0.1180555522441864,
+        "mrr": 0.287544846534729
+      },
+      "next_operation_accuracy": 0.625,
+      "next_operation_macro_f1": 0.38563087582588196,
+      "operation_confusion": [
+        [
+          83,
+          21,
+          27
+        ],
+        [
+          3,
+          5,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "prefixes": 144,
+      "candidate_goals": 18,
+      "note": "Internal held-out websites; before-action page text. No completion/distraction labels."
+    },
+    "4": {
+      "goal_retrieval": {
+        "top1": 0.0763888880610466,
+        "mrr": 0.2045266032218933
+      },
+      "frozen_mean_embedding_baseline": {
+        "top1": 0.1388888955116272,
+        "mrr": 0.3003140985965729
+      },
+      "alignment_weight": 0.0,
+      "selected_retrieval": {
+        "top1": 0.1388888955116272,
+        "mrr": 0.3003140985965729
+      },
+      "next_operation_accuracy": 0.5972222222222222,
+      "next_operation_macro_f1": 0.36630794405937195,
+      "operation_confusion": [
+        [
+          79,
+          29,
+          23
+        ],
+        [
+          3,
+          5,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "prefixes": 144,
+      "candidate_goals": 18,
+      "note": "Internal held-out websites; before-action page text. No completion/distraction labels."
+    }
+  },
+  "next_operation_majority_baseline": {
+    "label": "CLICK",
+    "accuracy": 0.9097222222222222,
+    "macro_f1": 0.31757575757575757
+  },
+  "checkpoint_sha256": "99583ab53658d2811668cc5bce26fc3b647d390914965f2476a5f23caf55a6f8",
+  "runtime": {
+    "device": "cuda",
+    "torch_version": "2.14.1+cu130",
+    "seconds": 15.282,
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "peak_allocated_mib": 35.3
+  }
+}

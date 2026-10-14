@@ -70,6 +70,28 @@ ScreenSpot은 GUI 평가 벤치마크여서 이번 학습 데이터로 쓰지 �
 
 이 규모는 전체 데이터 학습을 대체하지 않는다. 카메라·화면·문맥 전체가 제품 수준으로 검증됐다고 주장하지 않는다. 이전의 '실제 개인 데이터가 없어서 학습할 수 없음' 상태와 달리, 사용자 데이터를 요구하지 않는 재현 가능한 학습 경로와 실제 가중치·결과를 확보한 상태다.
 
+## Windows 로컬 GPU 학습
+
+RTX 4060 Laptop 8GB 환경에서 우선 사용할 실행 경로다. CPU 전용 torch가 설치되어 있으면 NVIDIA GPU가 있어도 사용하지 못한다. 이 환경에서는 드라이버가 지원하는 CUDA 13.0 공식 wheel을 사용한다. 다른 장비는 [PyTorch 공식 설치 안내](https://pytorch.org/get-started/locally/)에서 드라이버에 맞는 패키지를 선택한다.
+
+```powershell
+.\.venv-research\Scripts\python.exe -m pip install torch==2.14.1+cu130 torchvision==0.29.1+cu130 --index-url https://download.pytorch.org/whl/cu130
+.\.venv-research\Scripts\python.exe -c "import torch; print(torch.cuda.is_available())"
+powershell -ExecutionPolicy Bypass -File scripts/train-local-specialists.ps1
+```
+
+로컬 스크립트는 이미 다운로드한 공개 데이터를 사용하며 세 모델을 순차 학습한다. 기본값은 각 15 epochs, batch 16, 카메라 사람별 1,000개(총 15,000개)다. 화면·문맥 데이터 수는 현재 manifest를 따른다. `-Epochs`, `-BatchSize`, `-PerPerson`, `-Device cpu`로 조정할 수 있다. 모델·로그·평가·추론 결과는 `runs/local-gpu/`에 저장한다. 기존 `runs/public-models/` 결과를 덮어쓰지 않는다. 각 평가 파일의 `runtime`에 사용 장치, 소요 시간, PyTorch GPU 최대 할당 메모리를 기록한다. 이 메모리 수치는 드라이버·화면 출력·다른 프로세스 사용량을 포함하지 않는다.
+
+2026-10-15 로컬 RTX 4060 Laptop에서 실제 실행한 결과:
+
+| 역할 | 데이터 준비·학습·평가 소요 | PyTorch 최대 할당 | 평가 |
+|---|---:|---:|---|
+| 시선 CNN | 508.5초 | 29.9 MiB | 평균 각도 오차 6.82°, 평가 2,000개 |
+| 화면 CNN | 300.4초 | 483.4 MiB | 점유 macro-IoU 0.157 |
+| 목표 이력 GRU | 15.3초 | 35.3 MiB | 선택 결과 top-1 11.8%, 다음 동작 macro-F1 0.359 |
+
+시간은 Python 모듈 초기 import와 CUDA 설치 시간을 제외한다. GRU는 이전에 계산한 고정 문장 인코더 임베딩 캐시를 재사용했으므로 최초 인코딩 비용을 포함하지 않는다. 시선은 평가 표본도 600개에서 2,000개로 늘었으므로 이전 7.31°와 엄밀한 동일 표본 비교가 아니다. 이번 GRU는 검증에서 결합 비율 0을 선택해 관련성 판단에는 고정 인코더만 사용한다. 이전 배치 32 실험보다 좋아지지 않았으며 기존 모델을 자동 교체하지 않는다. GPU 실행 성공과 성능 개선을 구별한다. [로컬 실행 원본 평가 기록](experiments/local-gpu-2026-10-15/)
+
 ## HPC / 랩 컴퓨터에서 본 학습
 
 CUDA 버전에 맞는 torch/torchvision을 먼저 설치한다. 연구 의존성은 별도 가상환경에서 설치한다.

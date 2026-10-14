@@ -1,0 +1,218 @@
+{
+  "version": "public-specialists-v1",
+  "role": "screen_layout",
+  "seed": 7,
+  "pilot": true,
+  "counts": {
+    "train": 277,
+    "val": 141,
+    "test": 126
+  },
+  "parameters": 1619368,
+  "manifest_sha256": "9fb101662aacd191338b1122540ed1d6977a00f2e800d0a441978f50791500b3",
+  "source": {
+    "dataset": "ServiceNow/GroundCUA",
+    "revision": "5d6845b0116029d46ec762e734701c5b8ce207c3",
+    "license": "MIT",
+    "split": "custom application-disjoint; not an official benchmark split",
+    "per_app": 48,
+    "images": 576,
+    "applications": {
+      "train": [
+        "VSCode",
+        "LibreOffice Writer",
+        "Bash",
+        "VLC Media Player",
+        "GIMP",
+        "Mozilla Firefox"
+      ],
+      "val": [
+        "PyCharm",
+        "OnlyOffice Document Editor",
+        "Ubuntu Terminal"
+      ],
+      "test": [
+        "Geany",
+        "Joplin",
+        "Chromium"
+      ]
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.43920543413299945,
+      "val_loss": 0.344618817381825,
+      "seconds": 19.069
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.30624897654306155,
+      "val_loss": 0.33028544385171105,
+      "seconds": 18.231
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.27395354711622105,
+      "val_loss": 0.3232091675836144,
+      "seconds": 17.67
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.3922048993274193,
+      "val_loss": 0.445575050428404,
+      "seconds": 18.018
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.2992049067782151,
+      "val_loss": 0.41931242004353947,
+      "seconds": 16.989
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.2612275729756063,
+      "val_loss": 0.4674454035488426,
+      "seconds": 19.113
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.23729109495125092,
+      "val_loss": 0.44510381504998986,
+      "seconds": 19.141
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.21990313507374443,
+      "val_loss": 0.4244805688025258,
+      "seconds": 17.585
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.2101077831178796,
+      "val_loss": 0.4167762520254081,
+      "seconds": 16.656
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.19085762227485326,
+      "val_loss": 0.44579976744262884,
+      "seconds": 16.795
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.17888661379848578,
+      "val_loss": 0.4586768495381301,
+      "seconds": 16.959
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.17700340945798138,
+      "val_loss": 0.4170013943039779,
+      "seconds": 17.532
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.16219075137097053,
+      "val_loss": 0.4037538175570204,
+      "seconds": 17.202
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.15958912385499865,
+      "val_loss": 0.45318542980978677,
+      "seconds": 19.514
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.15387304277841796,
+      "val_loss": 0.44107957416815113,
+      "seconds": 20.097
+    }
+  ],
+  "validation": {
+    "macro_iou_on_present_classes": 0.14206840097904205,
+    "per_class": {
+      "Button": {
+        "iou": 0.21468676626682281,
+        "positive_cells": 4460
+      },
+      "Menu": {
+        "iou": 0.1554671972990036,
+        "positive_cells": 1716
+      },
+      "Input Elements": {
+        "iou": 0.1158561259508133,
+        "positive_cells": 5314
+      },
+      "Navigation": {
+        "iou": 0.13626788556575775,
+        "positive_cells": 2865
+      },
+      "Sidebar": {
+        "iou": 0.0,
+        "positive_cells": 422
+      },
+      "Visual Elements": {
+        "iou": 0.1621621549129486,
+        "positive_cells": 1644
+      },
+      "Information Display": {
+        "iou": 0.27379247546195984,
+        "positive_cells": 4928
+      },
+      "Others": {
+        "iou": 0.07831453531980515,
+        "positive_cells": 2074
+      }
+    },
+    "note": "32x32 multilabel occupancy IoU, not precise GUI grounding accuracy"
+  },
+  "test": {
+    "macro_iou_on_present_classes": 0.15716123580932617,
+    "per_class": {
+      "Button": {
+        "iou": 0.22057907283306122,
+        "positive_cells": 4139
+      },
+      "Menu": {
+        "iou": 0.1438356190919876,
+        "positive_cells": 1079
+      },
+      "Input Elements": {
+        "iou": 0.12751621007919312,
+        "positive_cells": 5018
+      },
+      "Navigation": {
+        "iou": 0.10233332961797714,
+        "positive_cells": 2340
+      },
+      "Sidebar": {
+        "iou": 0.0,
+        "positive_cells": 644
+      },
+      "Visual Elements": {
+        "iou": 0.3068459630012512,
+        "positive_cells": 1782
+      },
+      "Information Display": {
+        "iou": 0.2388906031847,
+        "positive_cells": 3454
+      },
+      "Others": {
+        "iou": 0.11728910356760025,
+        "positive_cells": 2129
+      }
+    },
+    "note": "32x32 multilabel occupancy IoU, not precise GUI grounding accuracy"
+  },
+  "limits": "Public-domain capability training; no measured personal productivity benefit or intent/distraction labels.",
+  "checkpoint_sha256": "ad5bcb9c6129d57e3c4cf11a50f6ee61913013e6909569be407c373bab6d6e6a",
+  "runtime": {
+    "device": "cuda",
+    "torch_version": "2.14.1+cu130",
+    "seconds": 300.416,
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "peak_allocated_mib": 483.4
+  }
+}

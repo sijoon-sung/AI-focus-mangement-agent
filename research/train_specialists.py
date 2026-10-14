@@ -3,6 +3,7 @@ import argparse
 import copy
 import hashlib
 import json
+import time
 from pathlib import Path
 import torch
 from torch.nn import functional as F
@@ -97,6 +98,10 @@ def main():
     p.add_argument('--no-pretrained',action='store_true',help='Screen encoder ablation only')
     p.add_argument('--freeze-encoder-epochs',type=int,default=3)
     a=p.parse_args()
+    started=time.perf_counter()
+    if a.device.startswith('cuda'):
+        if not torch.cuda.is_available():raise ValueError('CUDA is unavailable; install CUDA-enabled PyTorch or use --device cpu')
+        torch.cuda.reset_peak_memory_stats(a.device)
     if a.epochs<1 or a.batch_size<1:raise ValueError('Positive epochs/batch-size required')
     torch.manual_seed(7);torch.set_num_threads(a.threads)
     a.output.parent.mkdir(parents=True,exist_ok=True)
@@ -133,6 +138,7 @@ def main():
     optimizer=torch.optim.AdamW(groups,lr=a.lr,weight_decay=.001)
     best=float('inf');best_state=None;history=[]
     for epoch in range(a.epochs):
+        epoch_started=time.perf_counter()
         model.train();train_loss=0.;count=0
         if a.role=='screen_layout':
             frozen=epoch<a.freeze_encoder_epochs and not a.no_pretrained
@@ -150,7 +156,7 @@ def main():
                 value=objective(a.role,model,[x.to(a.device) for x in raw],operation_weights)
                 val_loss+=float(value)*len(raw[0]);val_count+=len(raw[0])
         val_loss/=val_count
-        history.append(dict(epoch=epoch+1,train_loss=train_loss/count,val_loss=val_loss))
+        history.append(dict(epoch=epoch+1,train_loss=train_loss/count,val_loss=val_loss,seconds=round(time.perf_counter()-epoch_started,3)))
         print(json.dumps(history[-1]),flush=True)
         if val_loss<best:
             best=val_loss;best_state={k:v.detach().cpu().clone() for k,v in model.state_dict().items()}
@@ -177,6 +183,9 @@ def main():
                     labels=LAYOUT_LABELS if a.role=='screen_layout' else OPERATIONS if a.role=='goal_history' else ['x','y','z'],
                     manifest_sha256=report['manifest_sha256'],alignment_weight=selected_weight,**text_metadata),a.output)
     report['checkpoint_sha256']=sha(a.output)
+    report['runtime']=dict(device=a.device,torch_version=str(torch.__version__),seconds=round(time.perf_counter()-started,3),
+                           gpu=torch.cuda.get_device_name(a.device) if a.device.startswith('cuda') else None,
+                           peak_allocated_mib=round(torch.cuda.max_memory_allocated(a.device)/1024**2,1) if a.device.startswith('cuda') else None)
     a.output.with_suffix('.metrics.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
     print(json.dumps(dict(saved=str(a.output),validation=report['validation'],test=report['test']),ensure_ascii=False),flush=True)
 

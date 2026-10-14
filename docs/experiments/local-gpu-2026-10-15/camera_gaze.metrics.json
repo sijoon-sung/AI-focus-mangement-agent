@@ -1,0 +1,131 @@
+{
+  "version": "public-specialists-v1",
+  "role": "camera_gaze",
+  "seed": 7,
+  "pilot": true,
+  "counts": {
+    "train": 11000,
+    "val": 2000,
+    "test": 2000
+  },
+  "parameters": 162275,
+  "manifest_sha256": "a73c569882576e351ee02a472ab58ff7b5cb186e49f515151ba139c935682f45",
+  "source": {
+    "dataset": "MPIIGaze",
+    "url": "https://datasets.d2.mpi-inf.mpg.de/MPIIGaze/MPIIGaze.tar.gz",
+    "license": "CC-BY-NC-SA-4.0; non-commercial scientific use",
+    "sha256": "b0710f16131888e6d2694fb6f29fede5123fd644912ec45905182a188fe78909",
+    "mat_files": 521
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.015918720120733434,
+      "val_loss": 0.009728624016046523,
+      "seconds": 20.799
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.00767635056105527,
+      "val_loss": 0.009741970211267471,
+      "seconds": 16.076
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.006434049579230222,
+      "val_loss": 0.008265777975320816,
+      "seconds": 16.216
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.005755262244831432,
+      "val_loss": 0.00762599578499794,
+      "seconds": 18.063
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.005319721059365706,
+      "val_loss": 0.00839044851064682,
+      "seconds": 16.64
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.004937384155663577,
+      "val_loss": 0.008337924003601074,
+      "seconds": 16.589
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.004601099642840298,
+      "val_loss": 0.007563028573989868,
+      "seconds": 14.627
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.004313824946230108,
+      "val_loss": 0.007365679144859314,
+      "seconds": 14.282
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0040409040180119605,
+      "val_loss": 0.008188282817602158,
+      "seconds": 13.903
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0038697043603116814,
+      "val_loss": 0.007496593445539474,
+      "seconds": 14.07
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.0036110402616587552,
+      "val_loss": 0.007312879413366318,
+      "seconds": 14.439
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.0033632966388355604,
+      "val_loss": 0.007495424419641495,
+      "seconds": 14.141
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.003238883137702942,
+      "val_loss": 0.007482776373624801,
+      "seconds": 14.341
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.003076239900155501,
+      "val_loss": 0.008327789068222046,
+      "seconds": 14.46
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.002946420756253329,
+      "val_loss": 0.007550769090652466,
+      "seconds": 14.279
+    }
+  ],
+  "validation": {
+    "mean_angular_degrees": 6.0228047370910645,
+    "median_angular_degrees": 5.507336139678955,
+    "examples": 2000
+  },
+  "test": {
+    "mean_angular_degrees": 6.823450088500977,
+    "median_angular_degrees": 6.300237655639648,
+    "examples": 2000
+  },
+  "limits": "Public-domain capability training; no measured personal productivity benefit or intent/distraction labels.",
+  "checkpoint_sha256": "ad0fa539232430921b27808aab16646b3967c4dbaa63ad21cd7e7b8a035a1613",
+  "runtime": {
+    "device": "cuda",
+    "torch_version": "2.14.1+cu130",
+    "seconds": 508.542,
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "peak_allocated_mib": 29.9
+  }
+}
