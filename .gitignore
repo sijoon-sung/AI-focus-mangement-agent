@@ -10,3 +10,5 @@ data/
 runs/
 *.pt
 *.pth
+local_data/
+chroma_db/
