@@ -78,6 +78,7 @@ class DesktopApp:
         self.ai_trace_id = None
         self.privacy_revision = 0
         self.specialists = None
+        self.observation_panel = None
         self.store.set_setting('screen_text_enabled', False)
         active = store.active()
         if active:
@@ -132,6 +133,8 @@ class DesktopApp:
         self.label(head, 'planwise', 25, True).pack(side='left')
         self.label(head, '  /  오늘을 가볍게', 13, color=MUTED).pack(side='left', padx=8)
         self.button(head, '설정', self.settings, width=70).pack(side='right')
+        self.observation_button=self.button(head,'화면·웹캠',self.open_observation,width=110)
+        self.observation_button.pack(side='right',padx=8)
         self.model_status = self.label(head, '로컬 AI 확인 중', 12, color=MUTED)
         self.model_status.pack(side='right', padx=18)
         body = ctk.CTkFrame(self.root, fg_color='transparent')
@@ -638,7 +641,7 @@ class DesktopApp:
         box.pack(fill='x')
         box.insert('1.0','ollama pull granite4:3b\nollama pull qwen3.5:4b')
         box.configure(state='disabled')
-        self.label(panel,'메모·세션은 로컬 저장. 화면은 ‘화면 보고 돕기’를 누를 때만 읽어요.\n화면에서 읽은 문구·AI 근거는 기본 7일 보관, 계획과 메모는 유지합니다.',12,color=MUTED,justify='left').pack(anchor='w',pady=15)
+        self.label(panel,'메모·세션은 로컬 저장. 화면·웹캠은 직접 켰을 때만 관측해요.\n화면에서 읽은 문구·AI 근거는 기본 7일 보관, 계획과 메모는 유지합니다.',12,color=MUTED,justify='left').pack(anchor='w',pady=15)
         self.button(panel,'화면·AI 기록 지우기',self.clear_observations).pack(anchor='w',pady=6)
         self.label(panel,'연구 도구',16,True).pack(anchor='w',pady=(18,6))
         self.label(panel,'CNN·GRU 학습과 카메라는 선택 기능입니다. 일상 사용에 필요하지 않아요.',12,color=MUTED).pack(anchor='w')
@@ -648,12 +651,21 @@ class DesktopApp:
 
     def clear_observations(self):
         if messagebox.askyesno('기록 지우기','화면에서 읽은 문구·AI 근거·관측과 교정 기록을 지울까요?\n계획과 세션은 유지합니다.',parent=self.root):
+            if self.observation_panel:self.observation_panel.stop()
             self.store.clear_observations()
             self.privacy_revision+=1
             self.store.set_setting('screen_text_enabled',False)
             self.ai_trace_id=None
             self.set_ai('관측과 AI 근거를 지웠어요.')
             self.render()
+
+    def open_observation(self):
+        if self.observation_panel:
+            self.observation_panel.window.lift()
+            return self.observation_panel
+        from local_agent.observation_panel import ObservationPanel
+        self.observation_panel=ObservationPanel(self)
+        return self.observation_panel
 
     def load_specialists(self):
         from tkinter import filedialog
@@ -762,6 +774,7 @@ class DesktopApp:
     def close(self):
         if self.closed:
             return
+        if self.observation_panel:self.observation_panel.close()
         self.store.set_setting('inbox_text',self.text())
         self.save_next_action()
         self.store.set_setting('desktop_selected',self.selected)

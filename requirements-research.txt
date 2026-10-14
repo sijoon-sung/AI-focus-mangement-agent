@@ -2,6 +2,6 @@
 torch>=2.5,<3
 torchvision>=0.20,<1
 numpy>=1.26,<3
-opencv-python-headless>=4.10,<6
+opencv-python-headless>=4.10,<5
 Pillow>=12,<13
 -r requirements-desktop.txt

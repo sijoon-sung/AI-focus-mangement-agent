@@ -57,7 +57,8 @@ class CaptureManager:
             if not ok:
                 raise ValueError('카메라 프레임을 읽지 못했어요.')
             gray=cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-            detector=cv2.CascadeClassifier(cv2.data.haarcascades+'haarcascade_frontalface_default.xml')
+            from local_agent.live_observation import face_detector
+            detector=face_detector()
             faces=detector.detectMultiScale(gray,scaleFactor=1.1,minNeighbors=4,minSize=(40,40))
             if not len(faces):
                 raise ValueError('분석 가능한 얼굴 영역을 찾지 못했어요. 부재나 비집중으로 판단하지 않습니다.')

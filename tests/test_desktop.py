@@ -32,6 +32,31 @@ class DesktopFlowTests(unittest.TestCase):
         self.app.apply_button.invoke()
         self.root.update()
 
+    def test_live_observation_stops_and_discards_pending_screen(self):
+        self.plan()
+        panel=self.app.open_observation()
+        panel.set_enabled('screen',True)
+        callbacks=[]
+        with patch.object(self.app,'job',side_effect=lambda k,w,c:callbacks.append(c)):
+            panel.screen_once()
+        self.assertEqual(len(callbacks),1)
+        panel.stop()
+        callbacks[0](({'visible_text':'old screen','specialists':[],'specialist_errors':[],'source':'qwen_vision_unverified','seconds':1},time.time(),None),None)
+        self.assertEqual(self.store.db.execute('SELECT COUNT(*) FROM concepts').fetchone()[0],0)
+        self.assertFalse(any(panel.gate.enabled.values()))
+
+    def test_live_screen_records_real_result_as_unverified_evidence(self):
+        self.plan()
+        panel=self.app.open_observation();panel.set_enabled('screen',True)
+        callbacks=[]
+        with patch.object(self.app,'job',side_effect=lambda k,w,c:callbacks.append(c)):
+            panel.screen_once()
+        callbacks[0](({'visible_text':'experiment running','uncertainties':'','specialists':[],'specialist_errors':[],'source':'qwen_vision_unverified','seconds':1},time.time(),None),None)
+        self.assertTrue(self.store.setting('screen_text_enabled',False))
+        self.assertIn('experiment running',panel.output.get('1.0','end'))
+        self.assertEqual(self.store.db.execute("SELECT COUNT(*) FROM concepts WHERE modality='screen_text'").fetchone()[0],1)
+        self.assertNotEqual(self.store.task(self.app.selected)['state'],'done')
+
     def test_buttons_drive_complete_pause_resume_and_next(self):
         self.plan()
         first=self.store.active()['task_id']

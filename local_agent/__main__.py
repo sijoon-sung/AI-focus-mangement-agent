@@ -34,7 +34,9 @@ def main():
     p.add_argument('--demo', action='store_true', help='Add example tasks only if database is empty; capture stays off')
     p.add_argument('--ui-smoke', action='store_true', help='Build UI and exit without collecting activity')
     p.add_argument('--classic', action='store_true', help='Open the previous research-oriented interface')
+    p.add_argument('--observe',action='store_true',help='Explicitly start visible foreground-screen and webcam observation for this run')
     a = p.parse_args()
+    if a.observe and (a.classic or a.ui_smoke):p.error('--observe requires the normal desktop UI')
     a.data_dir.mkdir(parents=True, exist_ok=True)
     try:
         lock = lock_directory(a.data_dir)
@@ -56,6 +58,10 @@ def main():
             from local_agent.desktop import DesktopApp
             root = ctk.CTk()
             app = DesktopApp(root, store, start_timer=not a.ui_smoke,check_models=not a.ui_smoke)
+        if a.observe:
+            panel=app.open_observation()
+            panel.set_enabled('screen',True)
+            panel.set_enabled('camera',True)
         if a.ui_smoke:
             root.update()
             if a.classic:
