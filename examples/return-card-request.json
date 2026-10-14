@@ -1,0 +1,15 @@
+{
+  "synthetic": true,
+  "context_revision": 1,
+  "task": {"id": "task-demo", "title": "실험 결과 정리", "completion": "비교표와 결과 해석을 직접 확인"},
+  "evidence": [
+    {"id": "e1", "source": "user_note", "value": "다음 행동은 baseline 결과를 표에 옮기기", "confirmed": true},
+    {"id": "e2", "source": "process_event", "value": "연결한 실험 프로세스가 종료됨. exit code와 결과 파일은 미확인", "confirmed": true}
+  ],
+  "allowed_actions": [
+    {"id": "review_log", "description": "실험 로그에서 성공 여부 확인"},
+    {"id": "edit_checkpoint", "description": "복귀 메모 수정"},
+    {"id": "rest", "description": "더 쉬기"}
+  ],
+  "instructions": "한국어 복귀 카드를 만든다. 프로세스 종료를 실험 성공이나 계획 완료로 표현하지 않는다. 기존 evidence ID와 allowed action ID만 사용한다."
+}

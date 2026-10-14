@@ -1,5 +1,7 @@
 # Planwise Local
 
+후속 설계: [Planwise Return — 작업 복귀를 돕는 로컬 AI](docs/RETURN_AGENT_DESIGN_KO.md). Qwen3.5-4B/Ollama, 카메라·화면 모델, 시간 맥락 추론, 개인 보정, 수정 가능한 근거와 학습·평가 계획을 명세했습니다. 신규 파이프라인은 아직 앱에 통합되지 않았습니다.
+
 **계획을 실행으로 연결하는 로컬 생산성 에이전트.** ActivityWatch·외부 API·LLM 없이 실행되는 Windows 데스크톱 MVP입니다. Python 표준 라이브러리와 Tkinter만 사용합니다.
 
 상태: **규칙 기반 MVP + 직접 학습 가능한 활동 종류 모델**. 실제 사용자 데이터로 학습한 집중력 모델이나 생산성 향상 효과가 검증된 제품은 아닙니다. 화면·카메라 관측, 소형 신경망, EBM, IDE 실행 완료 연동은 후속 연구 범위입니다.

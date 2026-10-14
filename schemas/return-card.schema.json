@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Planwise Return Card",
+  "description": "Shape validation only. Evidence IDs and action IDs must also be checked against the request. Facts should be rendered from source records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "evidence_ids", "action_id", "question", "uncertainties"],
+  "properties": {
+    "summary": {"type": "string", "minLength": 1, "maxLength": 600},
+    "evidence_ids": {"type": "array", "maxItems": 12, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 80}},
+    "action_id": {"type": "string", "minLength": 1, "maxLength": 80},
+    "question": {"type": ["string", "null"], "maxLength": 240},
+    "uncertainties": {"type": "array", "maxItems": 5, "items": {"type": "string", "minLength": 1, "maxLength": 240}}
+  }
+}
