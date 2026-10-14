@@ -9,6 +9,9 @@ from local_agent.planner import recommend, suggest_link, daily_summary
 from local_agent.sensors import WindowsSensor
 from local_agent.learning import capture, context, infer
 from local_agent.inbox_ui import InboxPanel
+from local_agent.return_ui import ReturnPanel
+from local_agent.return_service import checkpoint
+from local_agent.research_ui import ResearchPanel
 
 STATE_NAMES = {'todo': '예정', 'doing': '진행 중', 'paused': '중단', 'waiting': '대기', 'done': '완료'}
 KIND_NAMES = {'general': '일반', 'coding': '개발', 'writing': '작성', 'research': '자료 조사', 'admin': '행정'}
@@ -56,14 +59,20 @@ class AgentApp:
         self.review = ttk.Frame(tabs, padding=14)
         self.privacy = ttk.Frame(tabs, padding=14)
         self.inbox_tab = ttk.Frame(tabs, padding=14)
+        self.return_tab = ttk.Frame(tabs,padding=14)
+        self.research_tab = ttk.Frame(tabs,padding=14)
         tabs.add(self.inbox_tab, text='  메모와 하루 계획  ')
         tabs.add(self.today, text='  계획과 실행  ')
+        tabs.add(self.return_tab,text='  다시 이어가기  ')
         tabs.add(self.review, text='  근거와 회고  ')
         tabs.add(self.privacy, text='  개인정보  ')
+        tabs.add(self.research_tab,text='  관측과 학습  ')
         self._build_today()
         self._build_review()
         self._build_privacy()
         self.inbox = InboxPanel(self.inbox_tab, store, self.start_inbox_plan)
+        self.return_panel = ReturnPanel(self.return_tab,store,self.resume_from_card)
+        self.research_panel = ResearchPanel(self.research_tab,store,lambda:self.selected() or self.return_panel.task_id)
         self.banner.set('계획은 짧게, 시작은 가볍게. 오늘 하고 싶은 일을 적어 주세요.')
         # A crash must never count all overnight downtime as work.
         active = store.active()
@@ -132,6 +141,14 @@ class AgentApp:
             self.show_detail()
         self.today.master.select(self.today)
 
+    def resume_from_card(self,task_id):
+        self.store.start(task_id)
+        self.store.set_setting('last_heartbeat',time.time())
+        self.banner.set('세션 기록을 시작했어요. 작업 수행·완료 판정은 직접 해 주세요. 화면·카메라는 켜지 않았어요.')
+        self.refresh()
+        self.tree.selection_set(str(task_id))
+        self.today.master.select(self.today)
+
     def _build_review(self):
         self.summary = tk.StringVar()
         ttk.Label(self.review, textvariable=self.summary, wraplength=950).pack(anchor='w', pady=(0, 10))
@@ -152,7 +169,7 @@ class AgentApp:
         self.collection = tk.BooleanVar(value=self.store.setting('collection_enabled', False))
         ttk.Checkbutton(self.privacy, text='앱 범주와 5분 이상 입력 없음 여부 수집 (15초 간격)',
                         variable=self.collection, command=self.change_collection).pack(anchor='w')
-        ttk.Label(self.privacy, text='기본값은 꺼짐입니다. 창 제목·URL·키 입력 내용·클립보드·화면·카메라는 수집하지 않습니다.\n앱 실행 경로는 메모리에서 범주로 변환하며 데이터베이스에는 저장하지 않습니다.',
+        ttk.Label(self.privacy, text='기본값은 꺼짐입니다. 이 범주 수집은 창 제목·URL·키 입력 내용·클립보드·화면·카메라를 수집하지 않습니다.\n화면·카메라는 “관측과 학습”에서 별도로 허용한 뒤 한 번 확인할 때만 사용합니다.',
                   wraplength=950, style='Sub.TLabel').pack(anchor='w', pady=10)
         row = ttk.Frame(self.privacy)
         row.pack(anchor='w', pady=5)
@@ -170,6 +187,7 @@ class AgentApp:
             self.exclude_vars[key] = var
             ttk.Checkbutton(group, text=label, variable=var, command=self.save_exclusions).pack(side='left', padx=(0, 10))
         info = ('계획·메모·세션·사용자가 확인한 범주 연결은 직접 삭제할 때까지 보관합니다.\n'
+                '복귀 카드·연결 실행 이벤트는 계획과 함께 보관합니다. 시각 개념·맥락 정답은 활동 보관일을 따릅니다.\n'
                 '자유 문장 정리를 요청하면 메모 본문을 이 컴퓨터의 Ollama에 전달합니다. 외부 서버로 보내지 않습니다.\n'
                   '학습 정답(최근 5분 통계·작업 종류)은 활동 기록과 같은 보관일을 적용합니다.\n'
                   '직접 내보낸 학습 모델 파일은 기록 삭제와 별개로 파일을 직접 삭제해야 합니다.\n'
@@ -214,6 +232,8 @@ class AgentApp:
         summary = daily_summary(self.store)
         self.summary.set(f'오늘 완료 {summary["completed_tasks"]}개  ·  기록한 세션 {summary["session_minutes"]}분\n{summary["note"]}')
         self.show_detail()
+        if hasattr(self,'return_panel'):
+            self.return_panel.reload()
 
     def show_detail(self):
         task_id = self.selected()
@@ -298,6 +318,8 @@ class AgentApp:
         task = self.store.task(active['task_id'])
         action = simpledialog.askstring('다음 행동', '돌아오면 바로 할 행동', initialvalue=task['next_action'], parent=self.root)
         self.store.pause(note, action)
+        checkpoint(self.store,active['task_id'],note,action)
+        self.return_panel.show(active['task_id'])
         self.banner.set('중단했습니다. 다음에 작업을 선택하면 복귀 메모를 볼 수 있습니다.')
         self.refresh()
 
@@ -436,12 +458,16 @@ class AgentApp:
     def clear_observations(self):
         if messagebox.askyesno('기록 삭제', '활동·학습 정답·범주 연결·판단 기록을 삭제할까요? 계획과 세션은 남습니다. 내보낸 모델 파일은 직접 삭제하세요.', parent=self.root):
             self.store.clear_observations()
+            self.research_panel.reset()
             self.latest, self.decision_id = None, None
             self.write_text(self.explanation, '활동·판단·범주 개인화 기록을 삭제했습니다.')
 
     def reset(self):
         if messagebox.askyesno('전체 초기화', '모든 계획·메모·세션·개인화·설정을 삭제합니다. 계속할까요?', parent=self.root):
             self.store.reset()
+            self.return_panel.watches.close()
+            self.return_panel.task_id=None
+            self.research_panel.reset()
             self.inbox.reset()
             self.collection.set(False)
             self.retention.set('7')
@@ -465,6 +491,7 @@ class AgentApp:
 
     def tick(self):
         now = time.time()
+        self.return_panel.watches.poll(self.store)
         if self.store.active():
             self.store.set_setting('last_heartbeat', now)
         if self.collection.get():
@@ -499,6 +526,13 @@ class AgentApp:
 
     def close(self):
         self.inbox.close()
+        active=self.store.active()
+        if active:
+            with self.store.db:
+                self.store.db.execute('INSERT INTO task_events(task_id,at,kind,detail) VALUES (?,?,?,?)',
+                                      (active['task_id'],time.time(),'app_closed','앱을 닫아 세션을 중단했어요. 실제 작업 진척은 확인하지 않았어요.'))
+        self.return_panel.close()
+        self.research_panel.close()
         if self.tick_id:
             self.root.after_cancel(self.tick_id)
         self.store.pause('앱 종료로 세션 중단')

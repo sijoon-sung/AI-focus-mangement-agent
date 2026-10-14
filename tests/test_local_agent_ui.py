@@ -47,6 +47,32 @@ class DesktopTests(unittest.TestCase):
         self.assertEqual(self.store.task(self.task)['state'], 'waiting')
         self.assertIsNone(self.store.task(self.task)['wait_until'])
 
+    def test_return_card_resume_is_real_session(self):
+        self.app.start_task()
+        with patch('local_agent.app.simpledialog.askstring',side_effect=['초안 중단','표 확인']):
+            self.app.pause_task()
+        card=self.app.return_panel.facts.get('1.0','end')
+        self.assertIn('표 확인',card)
+        self.assertIsNone(self.store.active())
+        self.app.return_panel.resume()
+        self.assertEqual(self.store.active()['task_id'],self.task)
+
+    def test_research_no_model_and_explicit_correction(self):
+        panel=self.app.research_panel
+        self.assertFalse(any(panel.capture.enabled.values()))
+        panel.context()
+        self.assertEqual(panel.last_context['result']['status'],'untrained')
+        panel.label.current(1)
+        panel.correct_context()
+        panel.correct_context()
+        self.assertEqual(self.store.db.execute('SELECT COUNT(*) FROM context_labels').fetchone()[0],1)
+
+    def test_multiline_notes_route_to_granite(self):
+        self.app.inbox.notes.insert('1.0','보고서 작성\n시험 공부 과목 A, 과목 B')
+        with patch.object(self.app.inbox,'ask_granite') as parser:
+            self.app.inbox.organize()
+        parser.assert_called_once()
+
     def test_inbox_preview_apply_and_stale_guard(self):
         panel = self.app.inbox
         panel.notes.insert('1.0','! 논문 읽기 [30분]\n보고서 작성')

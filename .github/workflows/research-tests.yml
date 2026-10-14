@@ -15,3 +15,4 @@ jobs:
         env:
           OMP_NUM_THREADS: '2'
           MKL_NUM_THREADS: '2'
+      - run: python -m research.smoke_return

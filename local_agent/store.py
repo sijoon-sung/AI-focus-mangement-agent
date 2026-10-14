@@ -39,6 +39,15 @@ class Store:
         CREATE TABLE IF NOT EXISTS learning_examples (
           id INTEGER PRIMARY KEY, at REAL NOT NULL, day TEXT NOT NULL,
           kind TEXT NOT NULL, features TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS checkpoints (
+          id INTEGER PRIMARY KEY, task_id INTEGER REFERENCES tasks(id), at REAL NOT NULL, data TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS task_events (
+          id INTEGER PRIMARY KEY, task_id INTEGER REFERENCES tasks(id), at REAL NOT NULL, kind TEXT NOT NULL, detail TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS concepts (
+          id INTEGER PRIMARY KEY, at REAL NOT NULL, modality TEXT NOT NULL, data TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS context_labels (
+          id INTEGER PRIMARY KEY, at REAL NOT NULL, participant TEXT NOT NULL, episode TEXT NOT NULL,
+          label TEXT NOT NULL, data TEXT NOT NULL);
         ''')
         self.db.commit()
 
@@ -181,6 +190,8 @@ class Store:
             self.db.execute('DELETE FROM observations WHERE at < ?', (cutoff,))
             self.db.execute('DELETE FROM decisions WHERE at < ?', (cutoff,))
             self.db.execute('DELETE FROM learning_examples WHERE at < ?', (cutoff,))
+            self.db.execute('DELETE FROM concepts WHERE at < ?', (cutoff,))
+            self.db.execute('DELETE FROM context_labels WHERE at < ?', (cutoff,))
 
     def clear_observations(self):
         with self.db:
@@ -188,10 +199,12 @@ class Store:
             self.db.execute('DELETE FROM links')
             self.db.execute('DELETE FROM decisions')
             self.db.execute('DELETE FROM learning_examples')
+            self.db.execute('DELETE FROM concepts')
+            self.db.execute('DELETE FROM context_labels')
 
     def reset(self):
         with self.db:
-            for table in ['learning_examples', 'decisions', 'observations', 'links', 'sessions', 'tasks', 'settings']:
+            for table in ['context_labels','concepts','checkpoints','task_events','learning_examples', 'decisions', 'observations', 'links', 'sessions', 'tasks', 'settings']:
                 self.db.execute(f'DELETE FROM {table}')
         self.db.execute('VACUUM')
 

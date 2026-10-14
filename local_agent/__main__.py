@@ -53,7 +53,7 @@ def main():
             root.update()
             app.show_recommendation()
             root.update()
-            print('UI smoke passed: 4 tabs including scratchpad, task table, recommendation and explanation rendered.')
+            print('UI smoke passed: scratchpad, task, return, review, privacy and research tabs rendered.')
             app.close()
         else:
             root.mainloop()

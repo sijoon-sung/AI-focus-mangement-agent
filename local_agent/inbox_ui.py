@@ -3,7 +3,8 @@ import queue
 import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
-from local_agent.inbox import build_draft, apply_draft, organize_with_qwen
+from local_agent.inbox import build_draft, apply_draft
+from local_agent.note_parser import organize_with_granite
 
 
 class InboxPanel:
@@ -97,10 +98,8 @@ class InboxPanel:
         lines = [x for x in text.splitlines() if x.strip()]
         if not text:
             self.status.set('할 일을 한 가지만 적어도 괜찮아요.')
-        elif (len(lines)>1 and all(len(x)<=200 for x in lines)) or (len(text)<60 and not any(w in text for w in ('하고','읽고','싶어','해야','먼저'))):
-            self.preview()
         else:
-            self.ask_qwen()
+            self.ask_granite()
 
     def change_budget(self):
         from tkinter import simpledialog
@@ -170,7 +169,7 @@ class InboxPanel:
         self.on_apply(first_id)
         self.preview(outline)
 
-    def ask_qwen(self):
+    def ask_granite(self):
         text = self.text()
         if not text.strip() or len(text)>20000:
             messagebox.showinfo('메모 확인','1~20,000자 메모를 입력하세요.',parent=self.parent)
@@ -180,7 +179,7 @@ class InboxPanel:
         self.status.set('적어 준 내용을 정리하고 있어요. 메모는 계속 써도 괜찮아요.')
         def work():
             try:
-                self.results.put((text,organize_with_qwen(text),None))
+                self.results.put((text,organize_with_granite(text),None))
             except Exception as exc:
                 self.results.put((text,None,str(exc)))
         threading.Thread(target=work,daemon=True).start()
@@ -197,10 +196,11 @@ class InboxPanel:
         if source!=self.text():
             self.status.set('정리 중 메모가 변경되어 오래된 AI 결과를 적용하지 않았습니다. 다시 요청해 주세요.')
         elif error:
-            self.status.set('자동 정리가 잠시 어려워요. 한 줄에 한 가지씩 적으면 바로 정리할 수 있어요.')
+            self.preview(source)
+            self.status.set('Granite 연결이 어려워 줄별로만 정리했어요. 과목 분리는 아직이에요.')
         else:
-            self.preview(result)
-            self.status.set('이렇게 정리해 봤어요. 빠진 일이나 순서가 다르면 “조금 고칠래”에서 바꿔 주세요.')
+            self.preview(result['outline'])
+            self.status.set('이렇게 나눠 봤어요. '+(' '.join(result['notices']) if result['notices'] else '빠진 일은 없는지만 보고 바로 시작해도 좋아요.'))
 
     def reset(self):
         self.notes.delete('1.0','end')
