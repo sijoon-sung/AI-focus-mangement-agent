@@ -2,3 +2,11 @@ token.json
 client_secret_*.json
 .venv/
 .envs
+.env
+.venv*/
+__pycache__/
+*.py[cod]
+data/
+runs/
+*.pt
+*.pth
